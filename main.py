@@ -17,7 +17,7 @@ nhl_copyright = ""
 
 def do_update():
     with urllib.request.urlopen("https://statsapi.web.nhl.com/api/v1/standings?expand=standings.record") as url:
-        data = json.loads(url.read().decode('iso-8859-1'))
+        data = json.loads(url.read().decode('utf-8'))
 
     global nhl_copyright
     nhl_copyright = data['copyright']
@@ -142,7 +142,7 @@ def main():
     except Exception as e:
         raise
     else:
-        with io.StringIO() as pf, io.BytesIO() as mf, open("index.html", "w") as hf:
+        with io.StringIO() as pf, io.BytesIO() as mf, open("index.html", "w", encoding="utf-8") as hf:
             fig.write_html(
                 file=pf,
                 config={"displayModeBar": False},
