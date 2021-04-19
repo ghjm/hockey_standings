@@ -17,7 +17,7 @@ nhl_copyright = ""
 
 def do_update():
     with urllib.request.urlopen("https://statsapi.web.nhl.com/api/v1/standings?expand=standings.record") as url:
-        data = json.loads(url.read().decode('utf-8'))
+        data = json.loads(url.read().decode('iso-8859-1'))
 
     global nhl_copyright
     nhl_copyright = data['copyright']
@@ -158,7 +158,7 @@ def main():
                 '<html>',
                 '<head>',
                 f'<title>{main_title}</title>',
-                '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">',
+                '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">',
                 '</head>',
                 '<body>',
                 '<div style="width: 99%; min-width: 600px; height: 92%; min-height: 800px">',
