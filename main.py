@@ -120,7 +120,7 @@ def do_update():
         )
         fig.add_vline(x=teams[sorted_teams[-4]]['pts'], row=rowcount, col=1)
         sorted_by_pp_teams = sorted(dteams, key=lambda x: teams[x]['pp'])
-        fig.add_vline(x=teams[sorted_by_pp_teams[-5]]['pp'], row=rowcount, col=1)
+        fig.add_vline(x=teams[sorted_by_pp_teams[-4]]['pp'], row=rowcount, col=1)
         rowcount += 1
 
     min_pts = 9999
