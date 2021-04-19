@@ -158,7 +158,7 @@ def main():
                 '<html>',
                 '<head>',
                 f'<title>{main_title}</title>',
-                '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">',
+                '<meta charset=utf-8" />',
                 '</head>',
                 '<body>',
                 '<div style="width: 99%; min-width: 600px; height: 92%; min-height: 800px">',
