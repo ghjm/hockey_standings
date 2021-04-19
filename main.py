@@ -158,6 +158,7 @@ def main():
                 '<html>',
                 '<head>',
                 f'<title>{main_title}</title>',
+                '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">',
                 '</head>',
                 '<body>',
                 '<div style="width: 99%; min-width: 600px; height: 92%; min-height: 800px">',
@@ -171,8 +172,8 @@ def main():
                 '<hr>',
                 '<div style="width: 60%">'
                 '<small>',
-                '<p>Data feed provided courtesy of the NHL.&nbsp;&nbsp;(Thank you very much, NHL.)',
-                f'&nbsp;&nbsp;{nhl_copyright}</p>',
+                'Data feed provided courtesy of the NHL.&nbsp;&nbsp;(Thank you very much, NHL.)',
+                f'&nbsp;&nbsp;{nhl_copyright}',
                 '</small>',
                 '</div>',
                 '</body>',
