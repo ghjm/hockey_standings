@@ -152,8 +152,7 @@ def main():
             )
             markdown.markdownFromFile(input="how-this-works.md", output=mf, encoding="utf-8")
 
-            eastern = pytz.timezone('US/Eastern')
-            eastern_now = eastern.localize(datetime.datetime.now())
+            tz = pytz.timezone('US/Eastern')
 
             hf.write("\n".join([
                 '<html>',
@@ -164,7 +163,7 @@ def main():
                 '<div style="width: 99%; min-width: 600px; height: 92%; min-height: 800px">',
                 pf.getvalue(),
                 '</div>',
-                f'Last Updated: {eastern_now.strftime("%Y-%m-%d %H:%M:%S %Z%z")}',
+                f'Last Updated: {datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S %Z%z")}',
                 '<hr>',
                 '<div style="width: 60%">',
                 mf.getvalue().decode('utf-8'),
