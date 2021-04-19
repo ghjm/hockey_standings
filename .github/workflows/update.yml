@@ -1,0 +1,17 @@
+---
+name: Update index.html in S3
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: "pip install -r ./requirements.txt"
+      - run: "./main.py"
+      - uses: actions/upload-artifact@v2
+        with:
+          name: index.html
+          path: index.html
