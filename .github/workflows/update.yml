@@ -3,6 +3,11 @@ name: Update index.html in S3
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 * * * *'
+  push:
+    branches:
+      - main
 
 jobs:
   build:
