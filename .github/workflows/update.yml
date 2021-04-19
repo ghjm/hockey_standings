@@ -9,9 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: "pip install -r ./requirements.txt"
-      - run: "./main.py"
-      - uses: actions/upload-artifact@v2
-        with:
-          name: index.html
-          path: index.html
+      - run: pip install -r ./requirements.txt
+      - run: ./main.py
+      - uses: chrislennon/action-aws-cli@v1.1
+      - run: aws s3 cp index.html s3://hockey-standings.com/index.html
+        env:
+          AWS_REGION: us-east-2
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
