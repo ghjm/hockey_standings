@@ -1,5 +1,7 @@
 #!/bin/env python3
 
+import sys
+import os
 import io
 import datetime
 import urllib.request
@@ -142,7 +144,9 @@ def main():
     except Exception as e:
         raise
     else:
-        with io.StringIO() as pf, io.BytesIO() as mf, open("index.html", "w", encoding="utf-8") as hf:
+        scriptdir = os.path.dirname(os.path.realpath(sys.argv[0]))
+        htmlfilename = os.path.join(scriptdir, "index.html")
+        with io.StringIO() as pf, io.BytesIO() as mf, open(htmlfilename, "w", encoding="utf-8") as hf:
             fig.write_html(
                 file=pf,
                 config={"displayModeBar": False},
@@ -150,7 +154,8 @@ def main():
                 include_mathjax="cdn",
                 full_html=False,
             )
-            markdown.markdownFromFile(input="how-this-works.md", output=mf, encoding="utf-8")
+            mdfilename = os.path.join(scriptdir, "how-this-works.md")
+            markdown.markdownFromFile(input=mdfilename, output=mf, encoding="utf-8")
 
             tz = pytz.timezone('US/Eastern')
 
