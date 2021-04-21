@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: pip install -r ./requirements.txt
-      - run: ./main.py
+      - run: python3 ./main.py
       - run: aws s3 cp index.html s3://hockey-standings.com/index.html --content-type "text/html; charset=utf-8"
         env:
           AWS_REGION: us-east-2
