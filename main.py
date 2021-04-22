@@ -53,6 +53,7 @@ def do_update():
             "size": 24,
         },
         barmode='stack',
+        dragmode=False,
     )
     fig.set_subplots(rows=len(divisions), cols=1, row_titles=[d for d in divisions])
     rowcount = 1
@@ -157,6 +158,7 @@ def main():
                 include_plotlyjs="cdn",
                 include_mathjax="cdn",
                 full_html=False,
+                auto_open=False,
             )
             mdfilename = os.path.join(scriptdir, "how-this-works.md")
             markdown.markdownFromFile(input=mdfilename, output=mf, encoding="utf-8")
