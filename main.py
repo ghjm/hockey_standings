@@ -34,12 +34,14 @@ def do_update():
             teams[tn]['gp'] = t['gamesPlayed']
             teams[tn]['pnp'] = 2 * (games_per_season - t['gamesPlayed'])
             teams[tn]['pp'] = teams[tn]['pts'] + teams[tn]['pnp']
-            teams[tn]['pace'] = float(games_per_season) * float(teams[tn]['pts']) / float(teams[tn]['gp'])
             for r in t['records']['overallRecords']:
                 if r['type'] == 'lastTen':
                     teams[tn]['l10pts'] = 2 * r['wins'] + r['ot']
-            teams[tn]['l10pace'] = \
-                float(teams[tn]['pts']) + (float(games_per_season - teams[tn]['gp']) * float(teams[tn]['l10pts']) / 10.0)
+            if teams[tn]['gp'] > 0:
+                teams[tn]['pace'] = float(games_per_season) * float(teams[tn]['pts']) / float(teams[tn]['gp'])
+                if 'l10pts' in teams[tn]:
+                    teams[tn]['l10pace'] = float(teams[tn]['pts']) + (float(games_per_season - teams[tn]['gp']) *
+                                                                      float(teams[tn]['l10pts']) / 10.0)
 
     fig = go.Figure()
     fig.update_layout(
@@ -88,7 +90,7 @@ def do_update():
         )
         fig.add_trace(go.Scatter(
             y=[t for t in sorted_teams],
-            x=[teams[t]['l10pace'] for t in sorted_teams],
+            x=[teams[t]['l10pace'] if 'l10pace' in teams[t] else None for t in sorted_teams],
             name='Last 10 Pace',
             orientation='h',
             mode="markers",
@@ -105,7 +107,7 @@ def do_update():
         )
         fig.add_trace(go.Scatter(
             y=[t for t in sorted_teams],
-            x=[teams[t]['pace'] for t in sorted_teams],
+            x=[teams[t]['pace'] if 'pace' in teams[t] else None for t in sorted_teams],
             name='Season Pace',
             orientation='h',
             mode="markers",
