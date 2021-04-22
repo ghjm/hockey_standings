@@ -57,6 +57,8 @@ def do_update():
     fig.set_subplots(rows=len(divisions), cols=1, row_titles=[d for d in divisions])
     rowcount = 1
     for d, dteams in divisions.items():
+        fig.update_xaxes(fixedrange=True, row=rowcount, col=1)
+        fig.update_yaxes(fixedrange=True, row=rowcount, col=1)
         sorted_teams = sorted(dteams, key=lambda x: teams[x]['pts'])
         fig.add_trace(go.Bar(
             y=[t for t in sorted_teams],
