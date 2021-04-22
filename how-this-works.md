@@ -23,4 +23,4 @@ The "Pace" dots show where the team would end the season if their points percent
 same as it has been for the season so far ("Season Pace"), or if they maintain the points percentage from their last 10
 games ("Last 10 Pace").
 
-Source code for this visualization can be found at https://github.com/ghjm/NHL_Standings.
+Source code for this visualization can be found at [https://github.com/ghjm/NHL_Standings](https://github.com/ghjm/NHL_Standings).
