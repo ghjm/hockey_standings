@@ -7,6 +7,8 @@ import datetime
 import urllib.request
 import json
 import collections
+
+import jinja2
 import plotly.graph_objects as go
 import markdown
 import pytz
@@ -152,6 +154,7 @@ def main():
         scriptdir = os.path.dirname(os.path.realpath(sys.argv[0]))
         htmlfilename = os.path.join(scriptdir, "index.html")
         with io.StringIO() as pf, io.BytesIO() as mf, open(htmlfilename, "w", encoding="utf-8") as hf:
+
             fig.write_html(
                 file=pf,
                 config={"displayModeBar": False},
@@ -160,42 +163,22 @@ def main():
                 full_html=False,
                 auto_open=False,
             )
+
             mdfilename = os.path.join(scriptdir, "how-this-works.md")
             markdown.markdownFromFile(input=mdfilename, output=mf, encoding="utf-8")
 
             tz = pytz.timezone('US/Eastern')
 
-            hf.write("\n".join([
-                '<html>',
-                '<head>',
-                f'<title>{main_title}</title>',
-                '<style>',
-                '@media (hover: none) {',
-                '	.cursor-pointer {',
-                '		pointer-events: none !important;',
-                '	}',
-                '}',
-                '</style>',
-                '<meta charset=utf-8" />',
-                '</head>',
-                '<body>',
-                '<div style="width: 99%; min-width: 600px; height: 92%; min-height: 800px">',
-                pf.getvalue(),
-                '</div>',
-                f'Last Updated: {datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S %Z%z")}',
-                '<hr>',
-                '<div style="width: 60%">',
-                mf.getvalue().decode('utf-8'),
-                '</div>',
-                '<hr>',
-                '<div style="width: 60%">'
-                '<small>',
-                'Data feed provided courtesy of the NHL.&nbsp;&nbsp;(Thank you very much, NHL.)',
-                f'&nbsp;&nbsp;{nhl_copyright}',
-                '</small>',
-                '</div>',
-                '</body>',
-                '</html>']))
+            templatefilename = os.path.join(scriptdir, "index.html.j2")
+            template = jinja2.Template(open(templatefilename).read())
+
+            hf.write(template.render(
+                main_title=main_title,
+                main_graph=pf.getvalue(),
+                last_update_time=datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S %Z%z"),
+                how_this_works=mf.getvalue().decode('utf-8'),
+                nhl_copyright=nhl_copyright,
+            ))
 
 
 if __name__ == "__main__":

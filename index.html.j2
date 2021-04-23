@@ -1,0 +1,32 @@
+<html>
+<head>
+    <title>{{ main_title }}</title>
+    <style>
+        @media (hover: none) {
+            .cursor-pointer {
+                pointer-events: none !important;
+            }
+        }
+        @media only screen and (min-device-width: 600px) {
+            .explanatory-text {
+                max-width: 600px
+            }
+        }
+    </style>
+    <meta charset=utf-8" />
+</head>
+<body>
+    <div style="width: 99%; min-width: 600px; height: 92%; min-height: 800px">
+        {{ main_graph }}
+    </div>
+    Last Updated: {{ last_update_time }}
+    <hr>
+    <div class="explanatory-text">
+        {{ how_this_works }}
+        <hr>
+        <small>
+        Data feed provided courtesy of the NHL.&nbsp;&nbsp;(Thank you very much, NHL.)&nbsp;&nbsp;{{ nhl_copyright }}
+        </small>
+    </div>
+</body>
+</html>
