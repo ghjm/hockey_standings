@@ -38,9 +38,10 @@ def do_update():
             teams[tn]['gp'] = t['gamesPlayed']
             teams[tn]['pnp'] = 2 * (games_per_season - teams[tn]['gp'])
             teams[tn]['pp'] = teams[tn]['pts'] + teams[tn]['pnp']
-            for r in t['records']['overallRecords']:
-                if r['type'] == 'lastTen':
-                    teams[tn]['l10pts'] = 2 * r['wins'] + r['ot']
+            if 'records' in t:
+                for r in t['records']['overallRecords']:
+                    if r['type'] == 'lastTen':
+                        teams[tn]['l10pts'] = 2 * r['wins'] + r['ot']
             if teams[tn]['gp'] > 0 and teams[tn]['pnp'] > 0:
                 teams[tn]['pace'] = float(games_per_season) * float(teams[tn]['pts']) / float(teams[tn]['gp'])
                 if 'l10pts' in teams[tn]:
