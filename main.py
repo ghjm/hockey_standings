@@ -16,13 +16,15 @@ import markdown
 import pytz
 
 
+season = "20202021"
 games_per_season = 56
 main_title = "NHL Magic/Tragic Standings"
 nhl_copyright = ""
 
 
 def do_update():
-    with urllib.request.urlopen("https://statsapi.web.nhl.com/api/v1/standings?expand=standings.record") as url:
+    with urllib.request.urlopen(
+            f"https://statsapi.web.nhl.com/api/v1/standings?season={season}&expand=standings.record") as url:
         data = json.loads(url.read().decode('utf-8'))
 
     global nhl_copyright
@@ -47,6 +49,16 @@ def do_update():
                 if 'l10pts' in teams[tn]:
                     teams[tn]['l10pace'] = float(teams[tn]['pts']) + (float(games_per_season - teams[tn]['gp']) *
                                                                       float(teams[tn]['l10pts']) / 10.0)
+
+    with urllib.request.urlopen(f"https://statsapi.web.nhl.com/api/v1/schedule?season={season}") as url:
+        seasondata = json.loads(url.read().decode('utf-8'))
+
+    schedule = list()
+    for d in sorted(seasondata['dates'], key=lambda x: x['date']):
+        date = d['date']
+        for g in d['games']:
+            if g['status']['abstractGameState'] != 'Final':
+                schedule.append((g['teams']['home']['team']['name'], g['teams']['away']['team']['name']))
 
     fig = go.Figure()
     fig.update_layout(
@@ -132,7 +144,44 @@ def do_update():
             row=rowcount,
             col=1,
         )
-        fig.add_vline(x=teams[sorted_teams[-4]]['pts'], row=rowcount, col=1)
+
+        standings = [(t, teams[t]['pts']) for t in dteams]
+        ttc = set()
+        sch = [g for g in schedule]
+        while len(sch) > 0:
+            standings = sorted(standings, key=lambda x: x[1])
+            cur_4th, cur_4th_pts = standings[-4]
+            for g in [g for g in sch]:
+                sch.remove(g)
+                g0_idx = None
+                g1_idx = None
+                for i in range(len(standings)):
+                    if standings[i][0] == g[0]:
+                        g0_idx = i
+                        if g1_idx is not None:
+                            break
+                    if standings[i][0] == g[1]:
+                        g1_idx = i
+                        if g0_idx is not None:
+                            break
+                if g0_idx is None or g1_idx is None:
+                    break
+                if standings[g0_idx][1] > cur_4th_pts:
+                    winner_idx = g0_idx
+                    loser_idx = g1_idx
+                elif standings[g1_idx][1] > cur_4th_pts:
+                    winner_idx = g1_idx
+                    loser_idx = g0_idx
+                elif standings[g0_idx][1] < standings[g1_idx][1]:
+                    winner_idx = g0_idx
+                    loser_idx = g1_idx
+                else:
+                    winner_idx = g1_idx
+                    loser_idx = g0_idx
+                standings[winner_idx] = (standings[winner_idx][0], standings[winner_idx][1] + 2)
+                break
+        standings = sorted(standings, key=lambda x: x[1])
+        fig.add_vline(x=standings[-4][1], row=rowcount, col=1)
         sorted_by_pp_teams = sorted(dteams, key=lambda x: teams[x]['pp'])
         fig.add_vline(x=teams[sorted_by_pp_teams[-5]]['pp'], row=rowcount, col=1)
         rowcount += 1
@@ -187,7 +236,7 @@ def main():
                 google_analytics_id=google_analytics_id,
             ))
 
-            if 'POPUP_IN_LOCAL_BROWSER' in os.environ:
+            if 'POPUP_IN_LOCAL_BROWSER' in os.environ and os.environ['POPUP_IN_LOCAL_BROWSER']:
                 webbrowser.open(pathlib.Path(htmlfilename).as_uri())
 
 

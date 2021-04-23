@@ -6,8 +6,9 @@ are earned.  The right end is the maximum points the team could possibly end the
 left as games are lost and points become unavailable.
 
 The vertical blue lines show the playoff thresholds.  The line on the left is the elimination mark, and tracks
-the current points of the 4th place team in the division.  If a team's green bar falls short of this mark, then
-they can never match the points total of the 4th place team, and are eliminated.
+the current points of the 4th place team in the division, with a possible adjustment if the remaining schedule
+forces some team to earn more points than the current 4th place team.  If a team's green bar falls short of this
+mark, then they are eliminated.
 
 The vertical blue line on the right is the clinching threshold.  It tracks the possible points of the 5th place
 team - the team you have to beat to make it in.  If a team's green bar is fully to the right of this line, then
