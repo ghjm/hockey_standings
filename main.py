@@ -168,6 +168,7 @@ def main():
             markdown.markdownFromFile(input=mdfilename, output=mf, encoding="utf-8")
 
             tz = pytz.timezone('US/Eastern')
+            google_analytics_id = os.environ['GOOGLE_ANALYTICS_ID'] if 'GOOGLE_ANALYTICS_ID' in os.environ else None
 
             templatefilename = os.path.join(scriptdir, "index.html.j2")
             template = jinja2.Template(open(templatefilename).read())
@@ -178,6 +179,7 @@ def main():
                 last_update_time=datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S %Z%z"),
                 how_this_works=mf.getvalue().decode('utf-8'),
                 nhl_copyright=nhl_copyright,
+                google_analytics_id=google_analytics_id,
             ))
 
 
