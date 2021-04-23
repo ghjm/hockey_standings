@@ -7,6 +7,8 @@ import datetime
 import urllib.request
 import json
 import collections
+import webbrowser
+import pathlib
 
 import jinja2
 import plotly.graph_objects as go
@@ -34,12 +36,12 @@ def do_update():
             divisions[d['division']['name']].append(tn)
             teams[tn]['pts'] = t['points']
             teams[tn]['gp'] = t['gamesPlayed']
-            teams[tn]['pnp'] = 2 * (games_per_season - t['gamesPlayed'])
+            teams[tn]['pnp'] = 2 * (games_per_season - teams[tn]['gp'])
             teams[tn]['pp'] = teams[tn]['pts'] + teams[tn]['pnp']
             for r in t['records']['overallRecords']:
                 if r['type'] == 'lastTen':
                     teams[tn]['l10pts'] = 2 * r['wins'] + r['ot']
-            if teams[tn]['gp'] > 0:
+            if teams[tn]['gp'] > 0 and teams[tn]['pnp'] > 0:
                 teams[tn]['pace'] = float(games_per_season) * float(teams[tn]['pts']) / float(teams[tn]['gp'])
                 if 'l10pts' in teams[tn]:
                     teams[tn]['l10pace'] = float(teams[tn]['pts']) + (float(games_per_season - teams[tn]['gp']) *
@@ -61,11 +63,11 @@ def do_update():
     rowcount = 1
     for d, dteams in divisions.items():
         fig.update_xaxes(fixedrange=True, row=rowcount, col=1)
-        fig.update_yaxes(fixedrange=True, row=rowcount, col=1)
+        fig.update_yaxes(fixedrange=True, row=rowcount, col=1, showgrid=True)
         sorted_teams = sorted(dteams, key=lambda x: teams[x]['pts'])
         fig.add_trace(go.Bar(
             y=[t for t in sorted_teams],
-            x=[teams[t]['pts'] for t in sorted_teams],
+            x=[teams[t]['pts'] - (0.15 if teams[t]['pnp'] == 0 else 0) for t in sorted_teams],
             orientation='h',
             marker=dict(
                 color='rgba(0, 0, 0, 0)',
@@ -78,7 +80,7 @@ def do_update():
         )
         fig.add_trace(go.Bar(
             y=[t for t in sorted_teams],
-            x=[teams[t]['pnp'] for t in sorted_teams],
+            x=[max(teams[t]['pnp'], 0.3) for t in sorted_teams],
             name='Possible Points',
             orientation='h',
             marker=dict(
@@ -105,7 +107,8 @@ def do_update():
             showlegend=(rowcount == 1),
             legendgroup="l10pace",
             hoverinfo="text",
-            hovertext=[f"{t}: Last 10 Pace {teams[t]['l10pace']:.1f}" for t in sorted_teams]
+            hovertext=[f"{t}: Last 10 Pace {teams[t]['l10pace']:.1f}" if 'l10pace' in teams[t] else None
+                       for t in sorted_teams]
         ),
             row=rowcount,
             col=1,
@@ -122,7 +125,8 @@ def do_update():
             showlegend=(rowcount == 1),
             legendgroup="pace",
             hoverinfo="text",
-            hovertext=[f"{t}: Season Pace {teams[t]['pace']:.1f}" for t in sorted_teams]
+            hovertext=[f"{t}: Season Pace {teams[t]['pace']:.1f}" if 'pace' in teams[t] else None
+                       for t in sorted_teams]
         ),
             row=rowcount,
             col=1,
@@ -181,6 +185,9 @@ def main():
                 nhl_copyright=nhl_copyright,
                 google_analytics_id=google_analytics_id,
             ))
+
+            if 'POPUP_IN_LOCAL_BROWSER' in os.environ:
+                webbrowser.open(pathlib.Path(htmlfilename).as_uri())
 
 
 if __name__ == "__main__":
