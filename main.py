@@ -196,6 +196,7 @@ def do_update():
         if pp > max_pts:
             max_pts = pp
     fig.update_xaxes(range=[min_pts - 1, max_pts + 1], side="top", dtick=2)
+    fig.update_yaxes(dtick=1)
     return fig
 
 
