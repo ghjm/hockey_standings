@@ -72,9 +72,11 @@ def do_update():
         barmode='stack',
         dragmode=False,
     )
-    fig.set_subplots(rows=len(divisions), cols=1, row_titles=[d for d in divisions])
+    sorted_divisions = sorted(divisions)
+    fig.set_subplots(rows=len(sorted_divisions), cols=1, row_titles=[d for d in sorted_divisions])
     rowcount = 1
-    for d, dteams in divisions.items():
+    for d in sorted_divisions:
+        dteams = divisions[d]
         fig.update_xaxes(fixedrange=True, row=rowcount, col=1)
         fig.update_yaxes(fixedrange=True, row=rowcount, col=1, showgrid=True)
         sorted_teams = sorted(dteams, key=lambda x: teams[x]['pts'])
@@ -181,9 +183,12 @@ def do_update():
                 standings[winner_idx] = (standings[winner_idx][0], standings[winner_idx][1] + 2)
                 break
         standings = sorted(standings, key=lambda x: x[1])
-        fig.add_vline(x=standings[-4][1], row=rowcount, col=1)
+        elim_thresh = standings[-4][1]
         sorted_by_pp_teams = sorted(dteams, key=lambda x: teams[x]['pp'])
-        fig.add_vline(x=teams[sorted_by_pp_teams[-5]]['pp'], row=rowcount, col=1)
+        clinch_thresh = teams[sorted_by_pp_teams[-5]]['pp']
+        fig.add_vline(x=elim_thresh, row=rowcount, col=1)
+        if clinch_thresh > elim_thresh:
+            fig.add_vline(x=clinch_thresh, row=rowcount, col=1)
         rowcount += 1
 
     min_pts = 9999
