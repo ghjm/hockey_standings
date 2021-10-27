@@ -55,7 +55,6 @@ def do_update():
 
     schedule = list()
     for d in sorted(seasondata['dates'], key=lambda x: x['date']):
-        date = d['date']
         for g in d['games']:
             if g['status']['abstractGameState'] != 'Final':
                 schedule.append((g['teams']['home']['team']['name'], g['teams']['away']['team']['name']))
@@ -148,7 +147,6 @@ def do_update():
         )
 
         standings = [(t, teams[t]['pts']) for t in dteams]
-        ttc = set()
         sch = [g for g in schedule]
         while len(sch) > 0:
             standings = sorted(standings, key=lambda x: x[1])
@@ -170,16 +168,12 @@ def do_update():
                     break
                 if standings[g0_idx][1] > cur_4th_pts:
                     winner_idx = g0_idx
-                    loser_idx = g1_idx
                 elif standings[g1_idx][1] > cur_4th_pts:
                     winner_idx = g1_idx
-                    loser_idx = g0_idx
                 elif standings[g0_idx][1] < standings[g1_idx][1]:
                     winner_idx = g0_idx
-                    loser_idx = g1_idx
                 else:
                     winner_idx = g1_idx
-                    loser_idx = g0_idx
                 standings[winner_idx] = (standings[winner_idx][0], standings[winner_idx][1] + 2)
                 break
         standings = sorted(standings, key=lambda x: x[1])
@@ -200,50 +194,50 @@ def do_update():
         pp = t['pp']
         if pp > max_pts:
             max_pts = pp
-    fig.update_xaxes(range=[min_pts - 1, max_pts + 1], side="top", dtick=2)
+    span = max_pts - min_pts
+    dtick = 1
+    while (span / dtick) > 40:
+        dtick *= 2
+    fig.update_xaxes(range=[min_pts - 1, max_pts + 1], side="top", dtick=dtick)
     fig.update_yaxes(dtick=1)
     return fig
 
 
 def main():
-    try:
-        fig = do_update()
-    except Exception as e:
-        raise
-    else:
-        scriptdir = os.path.dirname(os.path.realpath(sys.argv[0]))
-        htmlfilename = os.path.join(scriptdir, "index.html")
-        with io.StringIO() as pf, io.BytesIO() as mf, open(htmlfilename, "w", encoding="utf-8") as hf:
+    fig = do_update()
+    scriptdir = os.path.dirname(os.path.realpath(sys.argv[0]))
+    htmlfilename = os.path.join(scriptdir, "index.html")
+    with io.StringIO() as pf, io.BytesIO() as mf, open(htmlfilename, "w", encoding="utf-8") as hf:
 
-            fig.write_html(
-                file=pf,
-                config={"displayModeBar": False},
-                include_plotlyjs="cdn",
-                include_mathjax="cdn",
-                full_html=False,
-                auto_open=False,
-            )
+        fig.write_html(
+            file=pf,
+            config={"displayModeBar": False},
+            include_plotlyjs="cdn",
+            include_mathjax="cdn",
+            full_html=False,
+            auto_open=False,
+        )
 
-            mdfilename = os.path.join(scriptdir, "how-this-works.md")
-            markdown.markdownFromFile(input=mdfilename, output=mf, encoding="utf-8")
+        mdfilename = os.path.join(scriptdir, "how-this-works.md")
+        markdown.markdownFromFile(input=mdfilename, output=mf, encoding="utf-8")
 
-            tz = pytz.timezone('US/Eastern')
-            google_analytics_id = os.environ['GOOGLE_ANALYTICS_ID'] if 'GOOGLE_ANALYTICS_ID' in os.environ else None
+        tz = pytz.timezone('US/Eastern')
+        google_analytics_id = os.environ['GOOGLE_ANALYTICS_ID'] if 'GOOGLE_ANALYTICS_ID' in os.environ else None
 
-            templatefilename = os.path.join(scriptdir, "index.html.j2")
-            template = jinja2.Template(open(templatefilename).read())
+        templatefilename = os.path.join(scriptdir, "index.html.j2")
+        template = jinja2.Template(open(templatefilename).read())
 
-            hf.write(template.render(
-                main_title=main_title,
-                main_graph=pf.getvalue(),
-                last_update_time=datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S %Z%z"),
-                how_this_works=mf.getvalue().decode('utf-8'),
-                nhl_copyright=nhl_copyright,
-                google_analytics_id=google_analytics_id,
-            ))
+        hf.write(template.render(
+            main_title=main_title,
+            main_graph=pf.getvalue(),
+            last_update_time=datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S %Z%z"),
+            how_this_works=mf.getvalue().decode('utf-8'),
+            nhl_copyright=nhl_copyright,
+            google_analytics_id=google_analytics_id,
+        ))
 
-            if 'POPUP_IN_LOCAL_BROWSER' in os.environ and os.environ['POPUP_IN_LOCAL_BROWSER']:
-                webbrowser.open(pathlib.Path(htmlfilename).as_uri())
+        # if 'POPUP_IN_LOCAL_BROWSER' in os.environ and os.environ['POPUP_IN_LOCAL_BROWSER']:
+        webbrowser.open(pathlib.Path(htmlfilename).as_uri())
 
 
 if __name__ == "__main__":
