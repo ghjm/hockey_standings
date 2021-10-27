@@ -47,8 +47,12 @@ def do_update():
             if teams[tn]['gp'] > 0 and teams[tn]['pnp'] > 0:
                 teams[tn]['pace'] = float(games_per_season) * float(teams[tn]['pts']) / float(teams[tn]['gp'])
                 if 'l10pts' in teams[tn]:
-                    teams[tn]['l10pace'] = float(teams[tn]['pts']) + (float(games_per_season - teams[tn]['gp']) *
-                                                                      float(teams[tn]['l10pts']) / 10.0)
+                    teams[tn]['l10pace'] = (
+                            float(teams[tn]['pts']) + (
+                                float(games_per_season - teams[tn]['gp']) *
+                                float(teams[tn]['l10pts']) / min(10.0, teams[tn]['gp'])
+                                )
+                            )
 
     with urllib.request.urlopen(f"https://statsapi.web.nhl.com/api/v1/schedule?season={season}") as url:
         seasondata = json.loads(url.read().decode('utf-8'))
