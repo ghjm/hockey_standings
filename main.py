@@ -30,12 +30,14 @@ def do_update():
     global nhl_copyright
     nhl_copyright = data['copyright']
 
+    conferences = collections.defaultdict(set)
     divisions = collections.defaultdict(list)
     teams = collections.defaultdict(dict)
     for d in data['records']:
         for t in d['teamRecords']:
             tn = t['team']['name']
             divisions[d['division']['name']].append(tn)
+            conferences[d['conference']['name']].add(d['division']['name'])
             teams[tn]['pts'] = t['points']
             teams[tn]['gp'] = t['gamesPlayed']
             teams[tn]['pnp'] = 2 * (games_per_season - teams[tn]['gp'])
@@ -75,10 +77,10 @@ def do_update():
         barmode='stack',
         dragmode=False,
     )
-    sorted_divisions = sorted(divisions)
-    fig.set_subplots(rows=len(sorted_divisions), cols=1, row_titles=[d for d in sorted_divisions])
+    sorted_divisions = [(c, d) for c in sorted(conferences) for d in sorted(conferences[c])]
+    fig.set_subplots(rows=len(sorted_divisions), cols=1, row_titles=[d for c, d in sorted_divisions])
     rowcount = 1
-    for d in sorted_divisions:
+    for c, d in sorted_divisions:
         dteams = divisions[d]
         fig.update_xaxes(fixedrange=True, row=rowcount, col=1)
         fig.update_yaxes(fixedrange=True, row=rowcount, col=1, showgrid=True)
