@@ -16,8 +16,8 @@ import markdown
 import pytz
 
 
-season = "20202021"
-games_per_season = 56
+season = "20212022"
+games_per_season = 82
 main_title = "NHL Magic/Tragic Standings"
 nhl_copyright = ""
 
