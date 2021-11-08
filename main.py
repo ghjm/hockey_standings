@@ -23,10 +23,12 @@ nhl_copyright = ""
 
 
 def do_update():
+    print("Retrieving standings...")
     with urllib.request.urlopen(
             f"https://statsapi.web.nhl.com/api/v1/standings?season={season}&expand=standings.record") as url:
         data = json.loads(url.read().decode('utf-8'))
 
+    print("Processing downloaded standings...")
     global nhl_copyright
     nhl_copyright = data['copyright']
 
@@ -56,15 +58,18 @@ def do_update():
                                 )
                             )
 
+    print("Downloading schedule...")
     with urllib.request.urlopen(f"https://statsapi.web.nhl.com/api/v1/schedule?season={season}") as url:
         seasondata = json.loads(url.read().decode('utf-8'))
 
+    print("Processing downloaded schedule...")
     schedule = list()
     for d in sorted(seasondata['dates'], key=lambda x: x['date']):
         for g in d['games']:
             if g['status']['abstractGameState'] != 'Final':
                 schedule.append((g['teams']['home']['team']['name'], g['teams']['away']['team']['name']))
 
+    print("Generating figure...")
     fig = go.Figure()
     fig.update_layout(
         title=main_title,
@@ -210,7 +215,9 @@ def do_update():
 
 
 def main():
+    print("Generating graphs...")
     fig = do_update()
+    print("Generating HTML...")
     scriptdir = os.path.dirname(os.path.realpath(sys.argv[0]))
     htmlfilename = os.path.join(scriptdir, "index.html")
     with io.StringIO() as pf, io.BytesIO() as mf, open(htmlfilename, "w", encoding="utf-8") as hf:
@@ -248,3 +255,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    print("Done.")
