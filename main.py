@@ -59,22 +59,21 @@ def do_update():
                             )
 
     print("Finding conference wildcard thresholds...")
-    clinch_thresh = dict()
-    for c in conferences:
-        wildcard_contenders = list()
-        for d in conferences[c]:
-            for ct in [t for t in sorted(divisions[d], key=lambda x: teams[x]['pp'], reverse=True)[3:]]:
-                wildcard_contenders.append(ct)
-        wildcard_contenders = sorted(wildcard_contenders, key=lambda x: teams[x]['pp'], reverse=True)
-        clinch_thresh[c] = teams[wildcard_contenders[2]]['pp']
-    elim_thresh = dict()
-    for c in conferences:
-        wildcard_contenders = list()
-        for d in conferences[c]:
-            for ct in [t for t in sorted(divisions[d], key=lambda x: teams[x]['pts'], reverse=True)[3:]]:
-                wildcard_contenders.append(ct)
-        wildcard_contenders = sorted(wildcard_contenders, key=lambda x: teams[x]['pts'], reverse=True)
-        elim_thresh[c] = teams[wildcard_contenders[1]]['pts']
+    clinch = {'pp': dict(), 'pts': dict()}
+    for stat in clinch:
+        for c in conferences:
+            division_leaders = list()
+            wildcard_contenders = list()
+            for d in conferences[c]:
+                for ct in [t for t in sorted(divisions[d], key=lambda x: teams[x][stat], reverse=True)[:3]]:
+                    division_leaders.append(ct)
+                for ct in [t for t in sorted(divisions[d], key=lambda x: teams[x][stat], reverse=True)[3:]]:
+                    wildcard_contenders.append(ct)
+            division_leaders = sorted(division_leaders, key=lambda x: teams[x][stat], reverse=True)
+            worst_division_leader = teams[division_leaders[-1]][stat]
+            wildcard_contenders = sorted(wildcard_contenders, key=lambda x: teams[x][stat], reverse=True)
+            wildcard_threshold = teams[wildcard_contenders[1]][stat]
+            clinch[stat][c] = min(worst_division_leader, wildcard_threshold)
 
     print("Generating figure...")
     fig = go.Figure()
@@ -164,9 +163,9 @@ def do_update():
             col=1,
         )
 
-        fig.add_vline(x=elim_thresh[c], row=rowcount, col=1)
-        if clinch_thresh[c] > elim_thresh[c]:
-            fig.add_vline(x=clinch_thresh[c], row=rowcount, col=1)
+        fig.add_vline(x=clinch['pts'][c], row=rowcount, col=1)
+        if clinch['pp'][c] > clinch['pts'][c]:
+            fig.add_vline(x=clinch['pp'][c], row=rowcount, col=1)
         rowcount += 1
 
     min_pts = 9999
