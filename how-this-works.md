@@ -8,20 +8,11 @@ left as games are lost and points become unavailable.
 The vertical blue lines show the playoff thresholds.  The line on the left is the elimination mark, and tracks
 the current points of the 4th place team in the division, with a possible adjustment if the remaining schedule
 forces some team to earn more points than the current 4th place team.  If a team's green bar falls short of this
-mark, then they are eliminated.
-
-The vertical blue line on the right is the clinching threshold.  It tracks the possible points of the 5th place
-team - the team you have to beat to make it in.  If a team's green bar is fully to the right of this line, then
-they have already earned more points than the 5th place team can possibly end with, so they have clinched a
-playoff spot.  If the green bar crosses the line, then the team "controls their own destiny" and can clinch by
-just winning enough games, without relying on other teams losing.
-
-In cases where the green bar is exactly touching a line, then tiebreaker rules might matter.  It is possible
-for a team to have clinched or been eliminated while touching the line, or not, based on their tiebreaker
-standings.  This graph does not attempt to depict any tiebreaker information.
+mark, then they are eliminated.  The line on the right is the clinching threshold, which tracks the maximum 
+possible points of the team just outside the last wildcard spot - the team you have to beat to make the playoffs.
 
 The "Pace" dots show where the team would end the season if their points percentage for their remaining games was the
 same as it has been for the season so far ("Season Pace"), or if they maintain the points percentage from their last 10
 games ("Last 10 Pace").
 
-Source code for this visualization can be found at [https://github.com/ghjm/NHL_Standings](https://github.com/ghjm/NHL_Standings).
+Source code for this visualization can be found at [https://github.com/ghjm/hockey_standings](https://github.com/ghjm/hockey_standings).

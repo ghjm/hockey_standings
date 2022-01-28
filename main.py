@@ -69,6 +69,16 @@ def do_update():
             if g['status']['abstractGameState'] != 'Final':
                 schedule.append((g['teams']['home']['team']['name'], g['teams']['away']['team']['name']))
 
+    print("Finding conference wildcard thresholds...")
+    clinch_thresh = dict()
+    for c in conferences:
+        wildcard_contenders = list()
+        for d in conferences[c]:
+            for ct in [t for t in sorted(divisions[d], key=lambda x: teams[x]['pp'], reverse=True)[3:]]:
+                wildcard_contenders.append(ct)
+        wildcard_contenders = sorted(wildcard_contenders, key=lambda x: teams[x]['pp'], reverse=True)
+        clinch_thresh[c] = teams[wildcard_contenders[2]]['pp']
+
     print("Generating figure...")
     fig = go.Figure()
     fig.update_layout(
@@ -189,11 +199,9 @@ def do_update():
                 break
         standings = sorted(standings, key=lambda x: x[1])
         elim_thresh = standings[-4][1]
-        sorted_by_pp_teams = sorted(dteams, key=lambda x: teams[x]['pp'])
-        clinch_thresh = teams[sorted_by_pp_teams[-5]]['pp']
         fig.add_vline(x=elim_thresh, row=rowcount, col=1)
-        if clinch_thresh > elim_thresh:
-            fig.add_vline(x=clinch_thresh, row=rowcount, col=1)
+        if clinch_thresh[c] > elim_thresh:
+            fig.add_vline(x=clinch_thresh[c], row=rowcount, col=1)
         rowcount += 1
 
     min_pts = 9999
