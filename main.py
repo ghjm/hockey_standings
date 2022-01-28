@@ -58,17 +58,6 @@ def do_update():
                                 )
                             )
 
-    print("Downloading schedule...")
-    with urllib.request.urlopen(f"https://statsapi.web.nhl.com/api/v1/schedule?season={season}") as url:
-        seasondata = json.loads(url.read().decode('utf-8'))
-
-    print("Processing downloaded schedule...")
-    schedule = list()
-    for d in sorted(seasondata['dates'], key=lambda x: x['date']):
-        for g in d['games']:
-            if g['status']['abstractGameState'] != 'Final':
-                schedule.append((g['teams']['home']['team']['name'], g['teams']['away']['team']['name']))
-
     print("Finding conference wildcard thresholds...")
     clinch_thresh = dict()
     for c in conferences:
@@ -78,6 +67,14 @@ def do_update():
                 wildcard_contenders.append(ct)
         wildcard_contenders = sorted(wildcard_contenders, key=lambda x: teams[x]['pp'], reverse=True)
         clinch_thresh[c] = teams[wildcard_contenders[2]]['pp']
+    elim_thresh = dict()
+    for c in conferences:
+        wildcard_contenders = list()
+        for d in conferences[c]:
+            for ct in [t for t in sorted(divisions[d], key=lambda x: teams[x]['pts'], reverse=True)[3:]]:
+                wildcard_contenders.append(ct)
+        wildcard_contenders = sorted(wildcard_contenders, key=lambda x: teams[x]['pts'], reverse=True)
+        elim_thresh[c] = teams[wildcard_contenders[1]]['pts']
 
     print("Generating figure...")
     fig = go.Figure()
@@ -167,40 +164,8 @@ def do_update():
             col=1,
         )
 
-        standings = [(t, teams[t]['pts']) for t in dteams]
-        sch = [g for g in schedule]
-        while len(sch) > 0:
-            standings = sorted(standings, key=lambda x: x[1])
-            cur_4th, cur_4th_pts = standings[-4]
-            for g in [g for g in sch]:
-                sch.remove(g)
-                g0_idx = None
-                g1_idx = None
-                for i in range(len(standings)):
-                    if standings[i][0] == g[0]:
-                        g0_idx = i
-                        if g1_idx is not None:
-                            break
-                    if standings[i][0] == g[1]:
-                        g1_idx = i
-                        if g0_idx is not None:
-                            break
-                if g0_idx is None or g1_idx is None:
-                    break
-                if standings[g0_idx][1] > cur_4th_pts:
-                    winner_idx = g0_idx
-                elif standings[g1_idx][1] > cur_4th_pts:
-                    winner_idx = g1_idx
-                elif standings[g0_idx][1] < standings[g1_idx][1]:
-                    winner_idx = g0_idx
-                else:
-                    winner_idx = g1_idx
-                standings[winner_idx] = (standings[winner_idx][0], standings[winner_idx][1] + 2)
-                break
-        standings = sorted(standings, key=lambda x: x[1])
-        elim_thresh = standings[-4][1]
-        fig.add_vline(x=elim_thresh, row=rowcount, col=1)
-        if clinch_thresh[c] > elim_thresh:
+        fig.add_vline(x=elim_thresh[c], row=rowcount, col=1)
+        if clinch_thresh[c] > elim_thresh[c]:
             fig.add_vline(x=clinch_thresh[c], row=rowcount, col=1)
         rowcount += 1
 
@@ -228,7 +193,7 @@ def main():
     print("Generating HTML...")
     scriptdir = os.path.dirname(os.path.realpath(sys.argv[0]))
     htmlfilename = os.path.join(scriptdir, "index.html")
-    with io.StringIO() as pf, io.BytesIO() as mf, open(htmlfilename, "w", encoding="utf-8") as hf:
+    with io.StringIO() as pf, open(htmlfilename, "w", encoding="utf-8") as hf:
 
         fig.write_html(
             file=pf,
@@ -238,9 +203,6 @@ def main():
             full_html=False,
             auto_open=False,
         )
-
-        mdfilename = os.path.join(scriptdir, "how-this-works.md")
-        markdown.markdownFromFile(input=mdfilename, output=mf, encoding="utf-8")
 
         tz = pytz.timezone('US/Eastern')
         google_analytics_id = os.environ['GOOGLE_ANALYTICS_ID'] if 'GOOGLE_ANALYTICS_ID' in os.environ else None
@@ -252,7 +214,6 @@ def main():
             main_title=main_title,
             main_graph=pf.getvalue(),
             last_update_time=datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S %Z%z"),
-            how_this_works=mf.getvalue().decode('utf-8'),
             nhl_copyright=nhl_copyright,
             google_analytics_id=google_analytics_id,
         ))
