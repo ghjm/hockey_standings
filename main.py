@@ -59,7 +59,7 @@ def do_update():
                             )
 
     print("Finding conference wildcard thresholds...")
-    clinch = {'pp': dict(), 'pts': dict()}
+    clinch = {'pp': dict(), 'pts': dict(), 'pace': dict()}
     for stat in clinch:
         for c in conferences:
             division_leaders = list()
@@ -166,6 +166,8 @@ def do_update():
         fig.add_vline(x=clinch['pts'][c], row=rowcount, col=1)
         if clinch['pp'][c] > clinch['pts'][c]:
             fig.add_vline(x=clinch['pp'][c], row=rowcount, col=1)
+        if clinch['pts'][c] < clinch['pace'][c] < clinch['pp'][c]:
+            fig.add_vline(x=clinch['pace'][c], row=rowcount, col=1, line_dash="dash", line_width=1)
         rowcount += 1
 
     min_pts = 9999
