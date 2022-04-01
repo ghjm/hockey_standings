@@ -12,7 +12,6 @@ import pathlib
 
 import jinja2
 import plotly.graph_objects as go
-import markdown
 import pytz
 
 
@@ -72,8 +71,12 @@ def do_update():
             division_leaders = sorted(division_leaders, key=lambda x: teams[x][stat], reverse=True)
             worst_division_leader = teams[division_leaders[-1]][stat]
             wildcard_contenders = sorted(wildcard_contenders, key=lambda x: teams[x][stat], reverse=True)
-            wildcard_threshold = teams[wildcard_contenders[1]][stat]
-            clinch[stat][c] = min(worst_division_leader, wildcard_threshold)
+            if stat == 'pts':
+                clinch[stat][c] = min(worst_division_leader, teams[wildcard_contenders[1]][stat])
+            elif stat == 'pp':
+                clinch[stat][c] = min(worst_division_leader, teams[wildcard_contenders[2]][stat])
+            elif stat == 'pace':
+                clinch[stat][c] = (teams[wildcard_contenders[1]][stat] + teams[wildcard_contenders[2]][stat]) / 2
 
     print("Generating figure...")
     fig = go.Figure()
@@ -185,6 +188,64 @@ def do_update():
         dtick *= 2
     fig.update_xaxes(range=[min_pts - 1, max_pts + 1], side="top", dtick=dtick)
     fig.update_yaxes(dtick=1)
+
+    fig.add_trace(go.Scatter(
+        y=[None],
+        x=[None],
+        name='Clinching Threshold',
+        orientation='h',
+        mode="markers",
+        marker=dict(
+            color='rgba(212, 232, 79, 1.0)',
+            symbol='line-ns',
+            line_width=2,
+            size=12,
+        ),
+        showlegend=True,
+        legendgroup="thresh",
+    ),
+        row=1,
+        col=1,
+    )
+
+    fig.add_trace(go.Scatter(
+        y=[None],
+        x=[None],
+        name='Season Pace Threshold',
+        orientation='h',
+        mode="markers",
+        marker=dict(
+            color='rgba(212, 232, 79, 1.0)',
+            symbol='line-ns',
+            line_width=1,
+            size=6,
+        ),
+        showlegend=True,
+        legendgroup="thresh",
+    ),
+        row=1,
+        col=1,
+    )
+
+    fig.add_trace(go.Scatter(
+        y=[None],
+        x=[None],
+        name='Elimination Threshold',
+        orientation='h',
+        mode="markers",
+        marker=dict(
+            color='rgba(212, 232, 79, 1.0)',
+            symbol='line-ns',
+            line_width=2,
+            size=12,
+        ),
+        showlegend=True,
+        legendgroup="thresh",
+    ),
+        row=1,
+        col=1,
+    )
+
     return fig
 
 
