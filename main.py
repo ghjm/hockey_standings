@@ -43,6 +43,7 @@ def do_update():
             teams[tn]['gp'] = t['gamesPlayed']
             teams[tn]['pnp'] = 2 * (games_per_season - teams[tn]['gp'])
             teams[tn]['pp'] = teams[tn]['pts'] + teams[tn]['pnp']
+            teams[tn]['l10pts'] = 0
             if 'records' in t:
                 for r in t['records']['overallRecords']:
                     if r['type'] == 'lastTen':
@@ -56,6 +57,8 @@ def do_update():
                                 float(teams[tn]['l10pts']) / min(10.0, teams[tn]['gp'])
                                 )
                             )
+            else:
+                teams[tn]['pace'] = 0
 
     print("Finding conference wildcard thresholds...")
     clinch = {'pp': dict(), 'pts': dict(), 'pace': dict()}
