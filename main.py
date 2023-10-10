@@ -15,7 +15,7 @@ import plotly.graph_objects as go
 import pytz
 
 
-season = "20222023"
+season = "20232024"
 games_per_season = 82
 main_title = "NHL Magic/Tragic Standings"
 nhl_copyright = ""
