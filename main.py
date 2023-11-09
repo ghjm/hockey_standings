@@ -23,42 +23,41 @@ nhl_copyright = ""
 
 def do_update():
     print("Retrieving standings...")
-    with urllib.request.urlopen(
-            f"https://statsapi.web.nhl.com/api/v1/standings?season={season}&expand=standings.record") as url:
+    req = urllib.request.Request(
+        f"https://api-web.nhle.com/v1/standings/now",
+        data=None,
+        headers={
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36',
+        },
+    )
+    with urllib.request.urlopen(req) as url:
         data = json.loads(url.read().decode('utf-8'))
 
     print("Processing downloaded standings...")
-    global nhl_copyright
-    nhl_copyright = data['copyright']
 
     conferences = collections.defaultdict(set)
     divisions = collections.defaultdict(list)
     teams = collections.defaultdict(dict)
-    for d in data['records']:
-        for t in d['teamRecords']:
-            tn = t['team']['name']
-            divisions[d['division']['name']].append(tn)
-            conferences[d['conference']['name']].add(d['division']['name'])
-            teams[tn]['pts'] = t['points']
-            teams[tn]['gp'] = t['gamesPlayed']
-            teams[tn]['pnp'] = 2 * (games_per_season - teams[tn]['gp'])
-            teams[tn]['pp'] = teams[tn]['pts'] + teams[tn]['pnp']
-            teams[tn]['l10pts'] = 0
-            if 'records' in t:
-                for r in t['records']['overallRecords']:
-                    if r['type'] == 'lastTen':
-                        teams[tn]['l10pts'] = 2 * r['wins'] + r['ot']
-            if teams[tn]['gp'] > 0:
-                teams[tn]['pace'] = float(games_per_season) * float(teams[tn]['pts']) / float(teams[tn]['gp'])
-                if 'l10pts' in teams[tn]:
-                    teams[tn]['l10pace'] = (
-                            float(teams[tn]['pts']) + (
-                                float(games_per_season - teams[tn]['gp']) *
-                                float(teams[tn]['l10pts']) / min(10.0, teams[tn]['gp'])
-                                )
+    for t in data['standings']:
+        team_name = t['teamName']['default']
+        divisions[t['divisionName']].append(team_name)
+        conferences[t['conferenceName']].add(t['divisionName'])
+        teams[team_name]['pts'] = t['points']
+        teams[team_name]['gp'] = t['gamesPlayed']
+        teams[team_name]['pnp'] = 2 * (games_per_season - teams[team_name]['gp'])
+        teams[team_name]['pp'] = teams[team_name]['pts'] + teams[team_name]['pnp']
+        teams[team_name]['l10pts'] = t['l10Points']
+        if teams[team_name]['gp'] > 0:
+            teams[team_name]['pace'] = float(games_per_season) * float(teams[team_name]['pts']) / float(teams[team_name]['gp'])
+            if 'l10pts' in teams[team_name]:
+                teams[team_name]['l10pace'] = (
+                        float(teams[team_name]['pts']) + (
+                            float(games_per_season - teams[team_name]['gp']) *
+                            float(teams[team_name]['l10pts']) / min(10.0, teams[team_name]['gp'])
                             )
-            else:
-                teams[tn]['pace'] = 0
+                        )
+        else:
+            teams[team_name]['pace'] = 0
 
     print("Finding conference wildcard thresholds...")
     clinch = {'pp': dict(), 'pts': dict(), 'pace': dict()}
@@ -178,7 +177,7 @@ def do_update():
 
     min_pts = 9999
     max_pts = 0
-    for tn, t in teams.items():
+    for team_name, t in teams.items():
         pts = t['pts']
         if pts < min_pts:
             min_pts = pts
@@ -279,7 +278,6 @@ def main():
             main_title=main_title,
             main_graph=pf.getvalue(),
             last_update_time=datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S %Z%z"),
-            nhl_copyright=nhl_copyright,
             google_analytics_id=google_analytics_id,
         ))
 
