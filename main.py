@@ -77,9 +77,9 @@ def do_update():
             if stat == 'pts':
                 clinch[stat][c] = min(worst_division_leader, teams[wildcard_contenders[1]][stat])
             elif stat == 'pp':
-                clinch[stat][c] = min(worst_division_leader, teams[wildcard_contenders[2]][stat])
+                clinch[stat][c] = min(worst_division_leader, teams[wildcard_contenders[1]][stat])
             elif stat == 'pace':
-                clinch[stat][c] = (teams[wildcard_contenders[1]][stat] + teams[wildcard_contenders[2]][stat]) / 2
+                clinch[stat][c] = (teams[wildcard_contenders[1]][stat] + teams[wildcard_contenders[1]][stat]) / 2
 
     print("Generating figure...")
     fig = go.Figure()
