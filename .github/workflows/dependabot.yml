@@ -1,11 +1,10 @@
----
-name: Dependabot Auto-Approve
+name: dependabot-auto-merge
 
 on:
   pull_request_target:
 
 permissions:
-  pull_requests: write
+  pull-requests: write
   contents: write
 
 jobs:
