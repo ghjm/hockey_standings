@@ -18,7 +18,7 @@ jobs:
       - run: python3 ./main.py
         env:
           GOOGLE_ANALYTICS_ID: ${{ secrets.GOOGLE_ANALYTICS_ID }}
-      - run: aws s3 cp index.html s3://hockey-standings.com/index.html --content-type "text/html; charset=utf-8"
+      - run: aws s3 cp index.html s3://hockey-standings.com/index.html --content-type "text/html; charset=utf-8" --cache-control "max-age=0, s-maxage=60, must-revalidate"
         env:
           AWS_REGION: us-east-2
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
