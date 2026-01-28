@@ -84,15 +84,14 @@ def do_update():
     print("Generating figure...")
     fig = go.Figure()
     fig.update_layout(
-        title=main_title,
-        title_x=0.5,
-        title_font={
-            "family": "Helvetica",
-            "color": "rgba(19, 0, 66, 1.0)",
-            "size": 24,
-        },
         barmode='stack',
         dragmode=False,
+        legend=dict(
+            bgcolor="rgba(255, 255, 255, 0.9)",
+            bordercolor="rgba(19, 0, 66, 0.4)",
+            borderwidth=1,
+            font=dict(color="rgba(19, 0, 66, 1.0)"),
+        ),
     )
     sorted_divisions = [(c, d) for c in sorted(conferences) for d in sorted(conferences[c])]
     fig.set_subplots(rows=len(sorted_divisions), cols=1, row_titles=[d for c, d in sorted_divisions])
@@ -100,7 +99,14 @@ def do_update():
     for c, d in sorted_divisions:
         dteams = divisions[d]
         fig.update_xaxes(fixedrange=True, row=rowcount, col=1)
-        fig.update_yaxes(fixedrange=True, row=rowcount, col=1, showgrid=True)
+        fig.update_yaxes(
+            fixedrange=True,
+            row=rowcount,
+            col=1,
+            showgrid=True,
+            automargin=True,
+            tickfont=dict(size=13, color="rgba(14, 18, 36, 1.0)"),
+        )
         sorted_teams = sorted(dteams, key=lambda x: teams[x]['pts'])
         fig.add_trace(go.Bar(
             y=[t for t in sorted_teams],
@@ -282,7 +288,10 @@ def main():
             google_analytics_id=google_analytics_id,
         ))
 
-        # if 'POPUP_IN_LOCAL_BROWSER' in os.environ and os.environ['POPUP_IN_LOCAL_BROWSER']:
+    should_open = not os.environ.get("CI")
+    if should_open and sys.platform.startswith("linux"):
+        should_open = bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
+    if should_open:
         webbrowser.open(pathlib.Path(htmlfilename).as_uri())
 
 
