@@ -123,6 +123,7 @@
             (function () {
                 var mobileYAxisLabels = {{ yaxis_mobile_labels | safe }};
                 var baseDtick = null;
+                var suppressNextUnhover = false;
                 function applyResponsiveLayout() {
                     if (!window.Plotly) return;
                     var plot = document.querySelector(".plotly-graph-div");
@@ -193,6 +194,35 @@
                 }
                 window.addEventListener("load", applyResponsiveLayout);
                 window.addEventListener("resize", onResize);
+
+                function shouldUnhoverFromEvent(event, plot) {
+                    if (suppressNextUnhover) return false;
+                    var inPlot = event.target && event.target.closest && event.target.closest(".plotly-graph-div");
+                    if (!inPlot) return true;
+                    if (event.target === plot) return true;
+                    if (event.target.classList && event.target.classList.contains("bg")) return true;
+                    return false;
+                }
+
+                function attachUnhoverHandlers() {
+                    var plot = document.querySelector(".plotly-graph-div");
+                    if (!plot || !window.Plotly || !window.Plotly.Fx) return;
+                    if (plot.__unhoverHandlersAttached) return;
+                    plot.__unhoverHandlersAttached = true;
+
+                    plot.on && plot.on("plotly_click", function () {
+                        suppressNextUnhover = true;
+                        setTimeout(function () { suppressNextUnhover = false; }, 0);
+                    });
+
+                    document.addEventListener("pointerdown", function (event) {
+                        if (shouldUnhoverFromEvent(event, plot)) {
+                            Plotly.Fx.unhover(plot);
+                        }
+                    });
+                }
+
+                window.addEventListener("load", attachUnhoverHandlers);
             })();
         </script>
         <footer class="page-footer explanatory-text">
