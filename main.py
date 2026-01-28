@@ -43,6 +43,7 @@ def do_update():
         team_name = t['teamName']['default']
         divisions[t['divisionName']].append(team_name)
         conferences[t['conferenceName']].add(t['divisionName'])
+        teams[team_name]['place'] = t.get('placeName', {}).get('default', team_name)
         teams[team_name]['pts'] = t['points']
         teams[team_name]['gp'] = t['gamesPlayed']
         teams[team_name]['pnp'] = 2 * (games_per_season - teams[team_name]['gp'])
@@ -92,16 +93,17 @@ def do_update():
             borderwidth=1,
             font=dict(color="rgba(19, 0, 66, 1.0)", size=11),
             orientation="v",
-            x=0.5,
-            xanchor="center",
-            y=1.08,
-            yanchor="bottom",
+            x=1.02,
+            xanchor="left",
+            y=1,
+            yanchor="top",
+            tracegroupgap=0,
         ),
-        margin=dict(t=90),
     )
     sorted_divisions = [(c, d) for c in sorted(conferences) for d in sorted(conferences[c])]
     fig.set_subplots(rows=len(sorted_divisions), cols=1, row_titles=[d for c, d in sorted_divisions])
     rowcount = 1
+    yaxis_mobile_labels = []
     for c, d in sorted_divisions:
         dteams = divisions[d]
         fig.update_xaxes(fixedrange=True, row=rowcount, col=1)
@@ -114,6 +116,12 @@ def do_update():
             tickfont=dict(size=13, color="rgba(14, 18, 36, 1.0)"),
         )
         sorted_teams = sorted(dteams, key=lambda x: teams[x]['pts'])
+        axis_name = "yaxis" if rowcount == 1 else f"yaxis{rowcount}"
+        yaxis_mobile_labels.append({
+            "axis": axis_name,
+            "tickvals": sorted_teams,
+            "ticktext": [teams[t]["place"] for t in sorted_teams],
+        })
         fig.add_trace(go.Bar(
             y=[t for t in sorted_teams],
             x=[teams[t]['pts'] - (0.15 if teams[t]['pnp'] == 0 else 0) for t in sorted_teams],
@@ -261,12 +269,12 @@ def do_update():
         col=1,
     )
 
-    return fig
+    return fig, yaxis_mobile_labels
 
 
 def main():
     print("Generating graphs...")
-    fig = do_update()
+    fig, yaxis_mobile_labels = do_update()
     print("Generating HTML...")
     scriptdir = os.path.dirname(os.path.realpath(sys.argv[0]))
     htmlfilename = os.path.join(scriptdir, "index.html")
@@ -291,6 +299,7 @@ def main():
             main_title=main_title,
             main_graph=pf.getvalue(),
             last_update_time=datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S %Z%z"),
+            yaxis_mobile_labels=json.dumps(yaxis_mobile_labels),
             google_analytics_id=google_analytics_id,
         ))
 
