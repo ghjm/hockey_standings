@@ -215,6 +215,9 @@
                         suppressNextUnhover = true;
                         setTimeout(function () { suppressNextUnhover = false; }, 0);
                     });
+                    plot.on && plot.on("plotly_legendclick", function () {
+                        Plotly.Fx.unhover(plot);
+                    });
 
                     document.addEventListener("pointerdown", function (event) {
                         if (shouldUnhoverFromEvent(event)) {
