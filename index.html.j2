@@ -195,13 +195,14 @@
                 window.addEventListener("load", applyResponsiveLayout);
                 window.addEventListener("resize", onResize);
 
-                function shouldUnhoverFromEvent(event, plot) {
+                function isDataTarget(event) {
+                    if (!event.target || !event.target.closest) return false;
+                    return !!event.target.closest(".point, .points, .bar, .bars, .scatter, .traces");
+                }
+
+                function shouldUnhoverFromEvent(event) {
                     if (suppressNextUnhover) return false;
-                    var inPlot = event.target && event.target.closest && event.target.closest(".plotly-graph-div");
-                    if (!inPlot) return true;
-                    if (event.target === plot) return true;
-                    if (event.target.classList && event.target.classList.contains("bg")) return true;
-                    return false;
+                    return !isDataTarget(event);
                 }
 
                 function attachUnhoverHandlers() {
@@ -216,7 +217,7 @@
                     });
 
                     document.addEventListener("pointerdown", function (event) {
-                        if (shouldUnhoverFromEvent(event, plot)) {
+                        if (shouldUnhoverFromEvent(event)) {
                             Plotly.Fx.unhover(plot);
                         }
                     });
