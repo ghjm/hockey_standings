@@ -90,8 +90,14 @@ def do_update():
             bgcolor="rgba(255, 255, 255, 0.9)",
             bordercolor="rgba(19, 0, 66, 0.4)",
             borderwidth=1,
-            font=dict(color="rgba(19, 0, 66, 1.0)"),
+            font=dict(color="rgba(19, 0, 66, 1.0)", size=11),
+            orientation="v",
+            x=0.5,
+            xanchor="center",
+            y=1.08,
+            yanchor="bottom",
         ),
+        margin=dict(t=90),
     )
     sorted_divisions = [(c, d) for c in sorted(conferences) for d in sorted(conferences[c])]
     fig.set_subplots(rows=len(sorted_divisions), cols=1, row_titles=[d for c, d in sorted_divisions])
